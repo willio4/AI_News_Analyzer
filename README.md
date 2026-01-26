@@ -1,0 +1,1 @@
+A full-stack web app that aggregates news from public APIs and uses AI to summarize, analyze bias, and extract key facts from articles.

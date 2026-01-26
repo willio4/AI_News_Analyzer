@@ -1,0 +1,26 @@
+<%- include("partials/header.ejs") %>
+
+<main class="max-w-3xl mx-auto px-4 py-8 text-black">
+  <h1 class="text-3xl font-bold mb-2"><%= article.title %></h1>
+  <p class="text-sm text-black mb-4">
+    <%= article.source.name %> • <%= article.author || "Unknown author" %>
+  </p>
+
+  <% if (article.urlToImage) { %>
+    <img src="<%= article.urlToImage || '/images/placeholder.jpg' %>" 
+      alt="<%= article.title %>" 
+      class="max-w-full h-auto"/>
+  <% } %>
+
+  <p class="leading-relaxed text-black"><%= article.content %></p>
+
+  <a
+    href="<%= article.url %>"
+    target="_blank"
+    class="inline-block mt-6 text-green-500 underline"
+  >
+    Read original source
+  </a>
+</main>
+
+<%- include("partials/footer.ejs") %>

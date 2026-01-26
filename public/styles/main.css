@@ -1,0 +1,29 @@
+:root {
+  --bg-color: #c4c4c4;
+  --text-color: #000000;
+  --primary-accent: #214E34;
+  --secondary-accent: #7B4D2D;
+}
+
+  body {
+    background-color: var(--bg-color);
+    margin: 0;
+  }
+
+  ol {
+    color: var(--text-color);
+  }
+
+  nav,
+  footer {
+    background-color: var(--secondary-accent);
+  }
+
+  main {
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  nav a:hover {
+    color: var(--primary-accent);
+  }
+

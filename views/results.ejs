@@ -1,0 +1,27 @@
+<%- include("partials/header") %>
+<main class="">
+
+  <h1 class="flex mt-10 text-4xl justify-center space-x-2">
+    <span>Search Results:</span>
+    <span style="color: var(--primary-accent);"><%= date %></span>
+  </h1>
+
+  <div class="mx-auto max-w-7xl pt-8 px-2 sm:px-1 lg:px-2">
+    <ol class="flex-col list-decimal list-inside text-lg">
+        <% data.forEach((article) => { %>
+            <li>
+                <a
+                href="/article?title=<%= encodeURIComponent(article.title) %>
+                &url=<%= encodeURIComponent(article.url) %>
+                &source=<%= encodeURIComponent(article.source.name) %>
+                &content=<%= encodeURIComponent(article.content || "") %>"
+                >
+                    <%= article.title %>
+                </a>
+
+            </li>
+        <% }) %>
+    </ol>
+    </div>
+</main>
+<%- include("partials/footer") %>
