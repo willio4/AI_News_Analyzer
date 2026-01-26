@@ -38,11 +38,12 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/article", (req, res) => {
-  const { title, url, source, content, urlToImage } = req.query;
+  const { title, url, source, author, content, urlToImage } = req.query;
   const article = {
       title,
       url,
       source: { name: source },
+      author,
       content,
       urlToImage,
     }
