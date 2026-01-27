@@ -8,20 +8,14 @@
 
   <div class="mx-auto max-w-7xl pt-8 px-2 sm:px-1 lg:px-2">
     <ol class="flex-col list-decimal list-inside text-lg">
-        <% data.forEach((article) => { %>
-            <li>
-                <a
-                href="/article?title=<%= encodeURIComponent(article.title) %>
-                &url=<%= encodeURIComponent(article.url) %>
-                &source=<%= encodeURIComponent(article.source.name) %>
-                &content=<%= encodeURIComponent(article.content || "") %>"
-                >
-                    <%= article.title %>
-                </a>
-
-            </li>
-        <% }) %>
-    </ol>
+  <% data.forEach((article) => { %>
+    <li>
+      <a href="/article?title=<%= encodeURIComponent(article.title) %>&url=<%= encodeURIComponent(article.url) %>&source=<%= encodeURIComponent(article.source.name) %>&author=<%= encodeURIComponent(article.author || '') %>&description=<%= encodeURIComponent(article.description || '') %>&urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>&content=<%= encodeURIComponent(article.content || '') %>&publishedAt=<%= encodeURIComponent(article.publishedAt || '') %>">
+        <%= article.title %>
+      </a>
+    </li>
+  <% }) %>
+</ol>
     </div>
 </main>
 <%- include("partials/footer.ejs") %>

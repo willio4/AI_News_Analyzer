@@ -3,7 +3,7 @@
 <main class="max-w-3xl mx-auto px-4 py-8 text-black">
   <h1 class="text-3xl font-bold mb-2"><%= article.title %></h1>
   <p class="text-sm text-black mb-4">
-    <%= article.source.name %> • <%= article.author || "Unknown author" %>
+    <%= article.source.name %> • <%= article.author || "Unknown author" %> @ <%= article.date || "Unknown Date" %>
   </p>
 
   <% if (article.urlToImage) { %>

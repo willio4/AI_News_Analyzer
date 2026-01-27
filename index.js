@@ -10,10 +10,21 @@ function getTodaysDate() {
   return `${month} ${day}, ${year}`;
 }
 
+function generateLLMPrompt({title, description, content}) {
+  console.log(title);
+  console.log(description);
+  console.log(content);
+}
+
 const app = express();
 const port = process.env.PORT;
 const apiKey = process.env.NEWS_API_KEY;
 const newsWebsite = "https://newsapi.org/v2/top-headlines"
+let currentArticle = {
+  title: '',
+  description: '',
+  content: '',
+}
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -30,7 +41,7 @@ app.get("/", async (req, res) => {
     },
   });
 
-  console.log(response.data.articles[0]);
+  
   res.render("index.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
@@ -38,7 +49,8 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/article", (req, res) => {
-  const { title, url, source, author, description, urlToImage, content } = req.query;
+  const { title, url, source, author, description, urlToImage, content, publishedAt } = req.query;
+  const date = publishedAt.slice(0,10);
   const article = {
       title,
       url,
@@ -47,9 +59,12 @@ app.get("/article", (req, res) => {
       description,
       urlToImage,
       content,
+      date,
     }
-    
-  console.log(article);
+
+    console.log(article);
+
+  generateLLMPrompt({title, description, content});
 
   if (!title || !url) return res.status(400).send("Missing article data");
 
@@ -134,6 +149,7 @@ app.get("/science", async (req, res) => {
       q: "",
     },
   });
+  console.log(response.data.articles[0]);
   res.render("science.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
