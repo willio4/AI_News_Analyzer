@@ -10,13 +10,14 @@
     <ol class="flex-col list-decimal list-inside text-lg">
   <% data.forEach((article) => { %>
     <li>
-      <a href="/article?
-        title=<%= encodeURIComponent(article.title) %>
+      <a href="/article?title=<%= encodeURIComponent(article.title) %>
         &url=<%= encodeURIComponent(article.url) %>
         &source=<%= encodeURIComponent(article.source.name) %>
         &author=<%= encodeURIComponent(article.author || '') %>
-        &content=<%= encodeURIComponent(article.content || '') %>
-        &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>">
+        &description=<%= encodeURIComponent(article.description || '') %>
+        &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>
+        &content=<%= encodeURIComponent(article.content || '') %>">
+        <%= article.title %>
       </a>
     </li>
   <% }) %>

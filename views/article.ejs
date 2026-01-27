@@ -11,16 +11,23 @@
       alt="<%= article.title %>" 
       class="max-w-full h-auto"/>
   <% } %>
+    <h2 class="font-bold text-lg">Description:</h2>
+  <p class="leading-relaxed text-black"><%= article.description %></p>
 
+  <h2 class="font-bold text-lg">Content:</h2>
   <p class="leading-relaxed text-black"><%= article.content %></p>
 
-  <a
-    href="<%= article.url %>"
-    target="_blank"
-    class="inline-block mt-6 text-green-500 underline"
-  >
-    Read original source
-  </a>
+  <div class="flex justify-between">
+    <a
+      href="<%= article.url %>"
+      target="_blank"
+      class="text-center inline-block mt-6 text-green-500 underline"
+    >
+      Read original source
+      </a>
+    <a href="javascript:window.location.reload();" class="text-center inline-block mt-6 text-red-500 underline">Dig Deeper With AI</button>
+    </a>
+  </div>
 </main>
 
 <%- include("partials/footer.ejs") %>

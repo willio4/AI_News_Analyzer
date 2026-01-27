@@ -38,16 +38,17 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/article", (req, res) => {
-  const { title, url, source, author, content, urlToImage } = req.query;
+  const { title, url, source, author, description, urlToImage, content } = req.query;
   const article = {
       title,
       url,
       source: { name: source },
       author,
-      content,
+      description,
       urlToImage,
+      content,
     }
-
+    
   console.log(article);
 
   if (!title || !url) return res.status(400).send("Missing article data");
