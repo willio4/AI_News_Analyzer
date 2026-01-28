@@ -1,8 +1,19 @@
-:root {
-  --bg-color: #c4c4c4;
-  --text-color: #000000;
-  --primary-accent: #214E34;
-  --secondary-accent: #7B4D2D;
+h1 {
+  font-family: "Luxurious Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+h2 {
+  font-family: "DM Serif Text", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+p {
+  font-family: "DM Serif Text", serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
   body {

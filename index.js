@@ -3,37 +3,40 @@ import axios from "axios";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
-
-
-
 dotenv.config();
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 function getTodaysDate() {
+  const weekday = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
   const month = new Date().toLocaleString("en-US", { month: "long" });
+  const dayofWeek = weekday[new Date().getDay()];
   const day = new Date().getDate();
   const year = new Date().getFullYear();
-  return `${month} ${day}, ${year}`;
+  return `${dayofWeek},${month} ${day}, ${year}`;
 }
-
 
 const app = express();
 const port = process.env.PORT;
 const apiKey = process.env.NEWS_API_KEY;
 const newsWebsite = "https://newsapi.org/v2/top-headlines";
+const newsWebsiteEverything = "https://newsapi.org/v2/everything"
 let currentArticle = null;
-
-
-
-
 
 app.use(express.static("public"));
 app.use(express.json());
 app.set("view engine", "ejs");
 
 app.get("/", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
+  const trending = await axios.get(newsWebsite, {
     params: {
       apiKey: apiKey,
       country: "us",
@@ -43,15 +46,57 @@ app.get("/", async (req, res) => {
     },
   });
 
-  
+  const politics = await axios.get(newsWebsiteEverything, {
+  params: {
+    q: "politics",
+    sortBy: "popularity",
+    apiKey: apiKey,
+    language: "en",
+    pageSize: 10,
+  },
+});
+
+const fashion = await axios.get(newsWebsiteEverything, {
+  params: {
+    q: "fashion",
+    sortBy: "popularity",
+    apiKey: apiKey,
+    language: "en",
+    pageSize: 10,
+  },
+});
+
+  const tech = await axios.get(newsWebsite, {
+    params: {
+      apiKey: apiKey,
+      country: "us",
+      category: "technology",
+      sources: "",
+      q: "",
+    },
+  });
+
   res.render("index.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    trending: trending.data.articles,
+    politics: politics.data.articles,
+    fashion: fashion.data.articles,
+    tech: tech.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
 app.get("/article", (req, res) => {
-  const { title, url, source, author, description, urlToImage, content, publishedAt } = req.query;
+  const {
+    title,
+    url,
+    source,
+    author,
+    description,
+    urlToImage,
+    content,
+    publishedAt,
+  } = req.query;
 
   if (!title || !url || !content) {
     return res.status(400).send("Missing article data");
@@ -81,6 +126,7 @@ app.get("/article", (req, res) => {
   res.render("article.ejs", {
     article,
     date: getTodaysDate(),
+    year: new Date().getFullYear(),
   });
 });
 
@@ -98,14 +144,14 @@ Publication Date: ${currentArticle.publicationDate}
 
   try {
     const response = await client.chat.completions.create({
-      model: "gpt-5-mini",        // more reliable than nano
+      model: "gpt-5-mini", // more reliable than nano
       messages: [
         { role: "system", content: LLMInstructions },
-        { role: "user", content: userMessage }
+        { role: "user", content: userMessage },
       ],
       max_completion_tokens: 2500,
       presence_penalty: 0,
-      frequency_penalty: 0
+      frequency_penalty: 0,
     });
 
     const report = response.choices[0].message.content;
@@ -116,8 +162,6 @@ Publication Date: ${currentArticle.publicationDate}
     res.status(500).json({ error: "Failed to get response from OpenAI" });
   }
 });
-
-
 
 app.get("/business", async (req, res) => {
   const response = await axios.get(newsWebsite, {
@@ -132,6 +176,7 @@ app.get("/business", async (req, res) => {
   res.render("business.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
@@ -148,6 +193,7 @@ app.get("/entertainment", async (req, res) => {
   res.render("entertainment.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
@@ -164,6 +210,7 @@ app.get("/general", async (req, res) => {
   res.render("general.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
@@ -180,6 +227,7 @@ app.get("/health", async (req, res) => {
   res.render("health.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
@@ -196,6 +244,7 @@ app.get("/science", async (req, res) => {
   res.render("science.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
@@ -212,6 +261,7 @@ app.get("/sports", async (req, res) => {
   res.render("sports.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
@@ -228,13 +278,14 @@ app.get("/technology", async (req, res) => {
   res.render("technology.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
+    year: new Date().getFullYear()
   });
 });
 
 app.get("/search", async (req, res) => {
-  
   res.render("search.ejs", {
     date: getTodaysDate(),
+    year: new Date().getFullYear()
     // data: response.data.articles,
   });
 });
@@ -269,15 +320,13 @@ app.get("/results", async (req, res) => {
     res.render("results.ejs", {
       date: getTodaysDate(),
       data: response.data.articles,
+      year: new Date().getFullYear(),
     });
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).send("Failed to fetch news");
   }
 });
-
-
-
 
 app.listen(port, () => {
   console.log(`listening to port: ${port}`);

@@ -1,28 +1,202 @@
 <%- include("partials/header.ejs") %>
-<main class="">
+<main class="my-10">
+  <!-- Trending Segment -->
+  <div class="flex items-end">
+    <h2 class="text-[40px] flex-1 ps-6">Trending</h2>
+    <p class="w-32 text-lg underline hover:text-green-500 text-end pe-6 pb-1">See More</p>
+  </div>
 
-  <h1 class="flex mt-10 text-4xl justify-center space-x-2">
-    <span>Today's News:</span>
-    <span style="color: var(--primary-accent);"><%= date %></span>
-  </h1>
+  <div class="px-10 mb-10">
+  <ol class="columns-1 md:columns-2 lg:columns-3 gap-8 text-lg">
+    <% trending.slice(0, 7).forEach((article, i) => { %>
+      <% 
+        const showImage = article.urlToImage && (i < 2 || i % 3 === 0);
+      %>
+      <li class="break-inside-avoid mb-6 border-b border-gray-400">
+        <a class="font-bold block mb-1"
+           href="/article?title=<%= encodeURIComponent(article.title) %>
+           &url=<%= encodeURIComponent(article.url) %>
+           &source=<%= encodeURIComponent(article.source.name) %>
+           &author=<%= encodeURIComponent(article.author || '') %>
+           &description=<%= encodeURIComponent(article.description || '') %>
+           &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>
+           &content=<%= encodeURIComponent(article.content || '') %>">
+        
+          <% if (showImage) { %>
+          <div class="h-64 overflow-hidden mb-3">
+            <img
+              src="<%= article.urlToImage %>"
+              alt="Article Image"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <% } %>
 
-  <div class="mx-auto max-w-7xl pt-8 px-2 sm:px-1 lg:px-2">
-    <ol class="flex-col list-decimal list-inside text-lg">
-  <% data.forEach((article) => { %>
-    <li>
-      <a href="/article?title=<%= encodeURIComponent(article.title) %>
-        &url=<%= encodeURIComponent(article.url) %>
-        &source=<%= encodeURIComponent(article.source.name) %>
-        &author=<%= encodeURIComponent(article.author || '') %>
-        &description=<%= encodeURIComponent(article.description || '') %>
-        &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>
-        &content=<%= encodeURIComponent(article.content || '') %>">
-        <%= article.title %>
-      </a>
-    </li>
-  <% }) %>
-</ol>
+        
+          <%= article.title %>
+        
 
-    </div>
+          <% if (article.description) { %>
+          <p class="text-sm font-thin text-gray-400">
+            <%= article.description %>
+          </p>
+        </a>
+      <% } %>
+          
+      </li>
+    <% }) %>
+  </ol>
+</div>
+
+<hr>
+
+<!-- Political Segment -->
+  <div class="flex items-end mt-10">
+    <h2 class="text-[40px] flex-1 ps-6">Political</h2>
+    <p class="w-32 text-lg underline hover:text-green-500 text-end pe-6 pb-1">See More</p>
+  </div>
+
+  <div class="px-10 mb-10">
+  <ol class="columns-1 md:columns-2 lg:columns-3 gap-8 text-lg">
+    <% politics.slice(0, 7).forEach((article, i) => { %>
+      <% 
+        const showImage = article.urlToImage && (i < 2 || i % 3 === 0);
+      %>
+      <li class="break-inside-avoid mb-6 border-b border-gray-400">
+        <a class="font-bold block mb-1"
+           href="/article?title=<%= encodeURIComponent(article.title) %>
+           &url=<%= encodeURIComponent(article.url) %>
+           &source=<%= encodeURIComponent(article.source.name) %>
+           &author=<%= encodeURIComponent(article.author || '') %>
+           &description=<%= encodeURIComponent(article.description || '') %>
+           &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>
+           &content=<%= encodeURIComponent(article.content || '') %>">
+        
+          <% if (showImage) { %>
+          <div class="h-64 overflow-hidden mb-3">
+            <img
+              src="<%= article.urlToImage %>"
+              alt="Article Image"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <% } %>
+
+        
+          <%= article.title %>
+        
+
+          <% if (article.description) { %>
+          <p class="text-sm font-thin text-gray-400">
+            <%= article.description %>
+          </p>
+        </a>
+      <% } %>
+          
+      </li>
+    <% }) %>
+  </ol>
+  </div>
+
+  <hr>
+
+<!-- Fashion Segment -->
+ 
+  <div class="flex items-end mt-10">
+    <h2 class="text-[40px] flex-1 ps-6">Fashion</h2>
+  </div>
+
+  <div class="px-10 mb-10">
+  <ol class="columns-1 md:columns-2 lg:columns-3 gap-8 text-lg">
+    <% fashion.slice(0, 7).forEach((article, i) => { %>
+      <% 
+        const showImage = article.urlToImage && (i < 2 || i % 3 === 0);
+      %>
+      <li class="break-inside-avoid mb-6 border-b border-gray-400">
+        <a class="font-bold block mb-1"
+           href="/article?title=<%= encodeURIComponent(article.title) %>
+           &url=<%= encodeURIComponent(article.url) %>
+           &source=<%= encodeURIComponent(article.source.name) %>
+           &author=<%= encodeURIComponent(article.author || '') %>
+           &description=<%= encodeURIComponent(article.description || '') %>
+           &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>
+           &content=<%= encodeURIComponent(article.content || '') %>">
+        
+          <% if (showImage) { %>
+          <div class="h-64 overflow-hidden mb-3">
+            <img
+              src="<%= article.urlToImage %>"
+              alt="Article Image"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <% } %>
+
+        
+          <%= article.title %>
+        
+
+          <% if (article.description) { %>
+          <p class="text-sm font-thin text-gray-400">
+            <%= article.description %>
+          </p>
+        </a>
+      <% } %>
+          
+      </li>
+    <% }) %>
+  </ol>
+  </div>
+
+  <hr>
+
+<!-- Tech Segment -->
+  <div class="flex items-end mt-10">
+    <h2 class="text-[40px] flex-1 ps-6">Technology</h2>
+    <p class="w-32 text-lg underline hover:text-green-500 text-end pe-6 pb-1">See More</p>
+  </div>
+
+  <div class="px-10 mb-10">
+  <ol class="columns-1 md:columns-2 lg:columns-3 gap-8 text-lg">
+    <% tech.slice(0, 7).forEach((article, i) => { %>
+      <% 
+        const showImage = article.urlToImage && (i < 2 || i % 3 === 0);
+      %>
+      <li class="break-inside-avoid mb-6 border-b border-gray-400">
+        <a class="font-bold block mb-1"
+           href="/article?title=<%= encodeURIComponent(article.title) %>
+           &url=<%= encodeURIComponent(article.url) %>
+           &source=<%= encodeURIComponent(article.source.name) %>
+           &author=<%= encodeURIComponent(article.author || '') %>
+           &description=<%= encodeURIComponent(article.description || '') %>
+           &urlToImage=<%= encodeURIComponent(article.urlToImage || '') %>
+           &content=<%= encodeURIComponent(article.content || '') %>">
+        
+          <% if (showImage) { %>
+          <div class="h-64 overflow-hidden mb-3">
+            <img
+              src="<%= article.urlToImage %>"
+              alt="Article Image"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <% } %>
+
+        
+          <%= article.title %>
+        
+
+          <% if (article.description) { %>
+          <p class="text-sm font-thin text-gray-400">
+            <%= article.description %>
+          </p>
+        </a>
+      <% } %>
+          
+      </li>
+    <% }) %>
+  </ol>
+</div>
+
 </main>
 <%- include("partials/footer.ejs") %>
