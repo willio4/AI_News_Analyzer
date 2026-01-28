@@ -1,7 +1,14 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import OpenAI from "openai";
+
+
+
+
 dotenv.config();
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 function getTodaysDate() {
   const month = new Date().toLocaleString("en-US", { month: "long" });
@@ -10,21 +17,16 @@ function getTodaysDate() {
   return `${month} ${day}, ${year}`;
 }
 
-function generateLLMPrompt(currentArticle) {
-  const prompt = LLMInstructions + JSON.stringify(currentArticle) + 'Treat all sources as potentially incomplete or biased unless independently corroborated. Use reputable, mainstream sources for updates and do not rely on a single outlet. If post-publication updates cannot be confirmed from reliable sources, state that updates are unavailable rather than estimating.';
-  return prompt;
-}
 
 const app = express();
 const port = process.env.PORT;
 const apiKey = process.env.NEWS_API_KEY;
-const newsWebsite = "https://newsapi.org/v2/top-headlines"
-let currentArticle = {
-  title: '',
-  description: '',
-  content: '',
-  date: '',
-}
+const newsWebsite = "https://newsapi.org/v2/top-headlines";
+let currentArticle = null;
+
+
+
+
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -50,34 +52,71 @@ app.get("/", async (req, res) => {
 
 app.get("/article", (req, res) => {
   const { title, url, source, author, description, urlToImage, content, publishedAt } = req.query;
-  const date = publishedAt.slice(0,10);
+
+  if (!title || !url || !content) {
+    return res.status(400).send("Missing article data");
+  }
+
+  const date = publishedAt ? publishedAt.slice(0, 10) : getTodaysDate();
+
   const article = {
-      title,
-      url,
-      source: { name: source },
-      author,
-      description,
-      urlToImage,
-      content,
-      date,
-    }
+    title,
+    url,
+    source: { name: source },
+    author,
+    description,
+    urlToImage,
+    content,
+    date,
+  };
 
-    currentArticle = {
-      title,
-      description,
-      content,
-      date
-    }
-
-  LLMPrompt = generateLLMPrompt(currentArticle);
-
-  if (!title || !url) return res.status(400).send("Missing article data");
+  // Store article for LLM route
+  currentArticle = {
+    title,
+    description,
+    partialContent: content,
+    publicationDate: date,
+  };
 
   res.render("article.ejs", {
-    article: article,
+    article,
     date: getTodaysDate(),
   });
 });
+
+app.get("/api/dig-deeper", async (req, res) => {
+  if (!currentArticle) {
+    return res.status(400).json({ error: "No article available" });
+  }
+
+  const userMessage = `
+Title: ${currentArticle.title}
+Description: ${currentArticle.description}
+Partial Content: ${currentArticle.partialContent}
+Publication Date: ${currentArticle.publicationDate}
+`;
+
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-5-mini",        // more reliable than nano
+      messages: [
+        { role: "system", content: LLMInstructions },
+        { role: "user", content: userMessage }
+      ],
+      max_completion_tokens: 2500,
+      presence_penalty: 0,
+      frequency_penalty: 0
+    });
+
+    const report = response.choices[0].message.content;
+
+    res.json({ text: report });
+  } catch (err) {
+    console.error("OpenAI error:", err);
+    res.status(500).json({ error: "Failed to get response from OpenAI" });
+  }
+});
+
 
 
 app.get("/business", async (req, res) => {
@@ -154,7 +193,6 @@ app.get("/science", async (req, res) => {
       q: "",
     },
   });
-  console.log(response.data.articles[0]);
   res.render("science.ejs", {
     date: getTodaysDate(),
     data: response.data.articles,
@@ -245,4 +283,34 @@ app.listen(port, () => {
   console.log(`listening to port: ${port}`);
 });
 
-const LLMInstructions = 'You are a neutral analytical reporting system. Input provided:- Title- Description- Partial article content- Original publication date Task:Generate an unbiased factual report about the topic. Rules:- Do not express opinions or value judgments.- Do not speculate or infer intent.- Clearly separate verified facts from claims or interpretations.- Explicitly state when information is missing or unclear due to partial content.- Identify notable developments, corrections, or updates that occurred after the publication date.- If no reliable updates are known, explicitly say so.- Use precise, neutral language and avoid emotionally loaded wording.- Do not assume the original article is accurate or complete. Output format (strict):Overview:Key Facts:Claims and Perspectives:Unknown or Unclear Information:Updates Since Publication:Contextual Notes (optional, only if necessary): If information cannot be verified, label it accordingly. ';
+// LLM Instructions (system prompt)
+const LLMInstructions = `You are a neutral, reader-friendly reporting system.
+
+Input:
+- Title
+- Description
+- Partial article content
+- Original publication date
+
+Task:
+Generate an unbiased, factual report about the topic. Make it **easy to read**, using:
+- Short paragraphs (2–3 sentences each)
+- Clear headings
+- Bullet points for key facts, statements, and missing info
+- Optional plain-language summary lines to highlight main ideas
+
+Rules:
+- Do not express opinions or value judgments
+- Do not speculate about intent or motives
+- Clearly separate reported facts from claims made by individuals
+- Explicitly note missing or unclear information
+- Include a section for updates since publication if known; otherwise, advise to check primary sources
+- Keep language concise and accessible to a general reader
+
+Output format (strict):
+What Happened:
+Key Facts:
+Statements:
+Missing or Unclear Info:
+Updates Since Publication:
+(Optional plain-language notes)`;

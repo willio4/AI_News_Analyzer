@@ -6,11 +6,8 @@
     <%= article.source.name %> • <%= article.author || "Unknown author" %> @ <%= article.date || "Unknown Date" %>
   </p>
 
-  <% if (article.urlToImage) { %>
-    <img src="<%= article.urlToImage || '/images/placeholder.jpg' %>" 
-      alt="<%= article.title %>" 
-      class="max-w-full h-auto"/>
-  <% } %>
+    <img src="<%= article.urlToImage || '/images/placeholder.jpg' %>" alt="<%= article.title %>" class="max-w-full h-auto"/>
+
     <h2 class="font-bold text-lg">Description:</h2>
   <p class="leading-relaxed text-black"><%= article.description %></p>
 
@@ -25,9 +22,14 @@
     >
       Read original source
       </a>
-    <a href="javascript:window.location.reload();" class="text-center inline-block mt-6 text-red-500 underline">Dig Deeper With AI</button>
-    </a>
+    <button id="LLM" class="text-center mt-6 text-red-500 underline">
+  Dig Deeper With AI
+</button>
   </div>
 </main>
+
+<script>
+
+</script>
 
 <%- include("partials/footer.ejs") %>
