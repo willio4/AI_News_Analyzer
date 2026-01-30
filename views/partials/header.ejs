@@ -13,54 +13,77 @@
   </head>
   <body class="flex flex-col min-h-screen">
     <!-- Nav Bar -->
-    
-<header class="w-full top-0 start-0 bg-gray-100">
-  <nav class="mb-2">
-      <div class="flex items-center">
-        <div class="w-64 flex-none text-center text-lg">
-          <span class="underline my-0 py-0"><%= date %></span>
-        </div>
-        <h1 class="flex-1 text-center text-[80px]"><a href="/">The Fifth Element</a></h1>
-        <div class="w-64">
-          <button type="button" class="bg-green-400 hover:bg-green-600 box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium rounded-lg text-base px-5 py-3 focus:outline-none">Subscribe to Newsletter</button>
-        </div>
+    <header class="w-full bg-gray-100">
+  <!-- Top bar -->
+  <nav class="px-4 py-3">
+    <div class="flex items-center justify-between md:grid md:grid-cols-3 md:items-center">
+      
+      <!-- Date (hidden on mobile) -->
+      <div class="hidden md:block text-left text-sm underline">
+        <%= date %>
       </div>
-  </nav>
-  <nav class="my-1 px-10 justify-between">
-      <div class="bg-neutral-primary">
-        <ul class="flex justify-between">
-          <li>
-            <a href="/" ><button class="font-bold ">Top Headlines</button></a>
-          </li>
-          <li>
-            <a href="/business" ><button class="font-bold ">Business</button></a>
-          </li>
-          <li>
-            <a href="/entertainment"><button class="font-bold ">Entertainment</button></a>
-          </li>
-          <li>
-            <a href="/general"><button class="font-bold ">General</button></a>
-          </li>
-          <li>
-            <a href="/health"><button class="font-bold ">Health</button></a>
-          </li>
-          <li>
-            <a href="/science"><button class="font-bold ">Science</button></a>
-          </li>
-          <li>
-            <a href="/sports"><button class="font-bold ">Sports</button></a>
-          </li>
-          <li>
-            <a href="/technology"><button class="font-bold ">Technology</button></a>
-          </li>
-          <li>
-            <a href="/search"><button class="font-bold ">Search</button></a>
-          </li>
-        </ul>
+
+      <!-- Title -->
+      <h1 class="text-center text-3xl md:text-[80px] my-5">
+        <a href="/">The Fifth Element</a>
+      </h1>
+
+      <!-- Right side -->
+      <div class="flex justify-end items-center gap-3">
+        <!-- Subscribe button (hidden on small screens) -->
+        <button
+          class="hidden md:inline-block bg-yellow-300 hover:bg-yellow-200 border rounded-lg px-5 py-2 text-sm font-medium"
+        >
+          Subscribe
+        </button>
+
+        <!-- Mobile menu button -->
+        <button
+          id="menuButton"
+          class="md:hidden p-2 rounded-lg border"
+          aria-label="Open menu"
+        >
+          ☰
+        </button>
       </div>
+    </div>
   </nav>
-  <hr>
+
+  <!-- Categories -->
+  <nav class="border-t">
+    <!-- Desktop menu -->
+    <ul class="hidden md:flex justify-between px-10 py-2 font-bold">
+      <li><a href="/">Home</a></li>
+      <li><a href="/business">Business</a></li>
+      <li><a href="/entertainment">Entertainment</a></li>
+      <li><a href="/general">General</a></li>
+      <li><a href="/health">Health</a></li>
+      <li><a href="/science">Science</a></li>
+      <li><a href="/sports">Sports</a></li>
+      <li><a href="/technology">Technology</a></li>
+      <li><a href="/search">Search</a></li>
+    </ul>
+
+    <!-- Mobile menu -->
+    <ul
+      id="mobileMenu"
+      class="hidden flex-col gap-3 px-6 py-4 font-bold md:hidden justify-items-end"
+    >
+      <li><a href="/">Home</a></li>
+      <li><a href="/business">Business</a></li>
+      <li><a href="/entertainment">Entertainment</a></li>
+      <li><a href="/general">General</a></li>
+      <li><a href="/health">Health</a></li>
+      <li><a href="/science">Science</a></li>
+      <li><a href="/sports">Sports</a></li>
+      <li><a href="/technology">Technology</a></li>
+      <li><a href="/search">Search</a></li>
+    </ul>
+  </nav>
+
+  <hr />
 </header>
+
 
 
     

@@ -7,6 +7,15 @@ dotenv.config();
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const sportsSources = [
+  "espn",
+  "bleacher-report",
+  "sports-illustrated",
+  "cbssports",
+  "fox-sports",
+  "nbcsports"
+].join(",");
+
 function getTodaysDate() {
   const weekday = [
     "Sunday",
@@ -35,78 +44,122 @@ app.use(express.static("public"));
 app.use(express.json());
 app.set("view engine", "ejs");
 
+const cache = {};
+const ONE_DAY = 24 * 60 * 60 * 1000;
+
+async function fetchWithCache(key, fetchFn) {
+  const now = Date.now();
+  const cached = cache[key];
+
+  if (cached && now - cached.timestamp < ONE_DAY) {
+    return cached.data;
+  }
+
+  const data = await fetchFn();
+
+  cache[key] = {
+    data,
+    timestamp: now
+  };
+
+  return data;
+}
+
+
 app.get("/", async (req, res) => {
-  const trending = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "",
-      sources: "",
-      q: "",
-    },
-  });
+  const [
+    trending,
+    politics,
+    fashion,
+    tech,
+    nba,
+    nfl
+  ] = await Promise.all([
+    fetchWithCache("trending", async () => {
+      const r = await axios.get(newsWebsite, {
+        params: { apiKey, country: "us" }
+      });
+      return r.data.articles;
+    }),
 
-  const politics = await axios.get(newsWebsiteEverything, {
-  params: {
-    q: "politics OR government",
-    sortBy: "relevancy",
-    apiKey: apiKey,
-    language: "en",
-    pageSize: 8,
-  },
-});
+    fetchWithCache("politics", async () => {
+      const r = await axios.get(newsWebsiteEverything, {
+        params: {
+          q: "politics OR government",
+          language: "en",
+          sortBy: "relevancy",
+          apiKey,
+          pageSize: 8
+        }
+      });
+      return r.data.articles;
+    }),
 
-const fashion = await axios.get(newsWebsiteEverything, {
-  params: {
-    q: '"fashion industry" OR "fashion trends" OR "high fashion" OR "fashion designers"',
-    language: "en",
-    apiKey: apiKey,
-    pageSize: 8,
-  },
-});
+    fetchWithCache("fashion", async () => {
+      const r = await axios.get(newsWebsiteEverything, {
+        params: {
+          q: '"fashion industry" OR "fashion trends" OR "high fashion"',
+          language: "en",
+          apiKey,
+          pageSize: 8
+        }
+      });
+      return r.data.articles;
+    }),
 
-const nba = await axios.get(newsWebsiteEverything, {
-  params: {
-    q: 'nba OR basketball',
-    language: "en",
-    sortBy: "publishedAt",
-    apiKey: apiKey,
-    pageSize: 4,
-  },
-});
+    fetchWithCache("tech", async () => {
+      const r = await axios.get(newsWebsite, {
+        params: {
+          apiKey,
+          country: "us",
+          category: "technology",
+          pageSize: 8
+        }
+      });
+      return r.data.articles;
+    }),
 
-const nfl = await axios.get(newsWebsiteEverything, {
-  params: {
-    q: 'nfl OR football',
-    language: "en",
-    sortBy: "publishedAt",
-    apiKey: apiKey,
-    pageSize: 4,
-  },
-});
+    fetchWithCache("nba", async () => {
+      const r = await axios.get(newsWebsiteEverything, {
+        params: {
+          q: "nba -bonus -promo -sportsbook -casino -gambling -ncaa -college",
+          sources: sportsSources,
+          language: "en",
+          sortBy: "publishedAt",
+          apiKey,
+          pageSize: 4
+        }
+      });
+      return r.data.articles;
+    }),
 
-  const tech = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "technology",
-      sources: "",
-      q: "",
-      pageSize: 8,
-    },
-  });
+    fetchWithCache("nfl", async () => {
+      const r = await axios.get(newsWebsiteEverything, {
+        params: {
+          q: "nfl -bonus -promo -sportsbook -casino -gambling -ncaa -college",
+          sources: sportsSources,
+          language: "en",
+          sortBy: "publishedAt",
+          apiKey,
+          pageSize: 4
+        }
+      });
+      return r.data.articles;
+    })
+  ]);
 
   res.render("index.ejs", {
     date: getTodaysDate(),
-    trending: trending.data.articles,
-    politics: politics.data.articles,
-    fashion: fashion.data.articles,
-    tech: tech.data.articles,
-    nfl: nfl.data.articles,
-    nba: nba.data.articles,
+    trending,
+    politics,
+    fashion,
+    tech,
+    nba,
+    nfl,
     year: new Date().getFullYear()
   });
 });
+
 
 app.get("/article", (req, res) => {
   const {
@@ -119,7 +172,7 @@ app.get("/article", (req, res) => {
     content,
     publishedAt,
   } = req.query;
-
+  
   if (!title || !url) {
     return res.status(400).send("Missing article data");
   }
@@ -179,10 +232,6 @@ Publication Date: ${currentArticle.publicationDate}
     });
 
     const report = response.choices[0].message.content;
-    console.log("\n\n\nHere is message:\n")
-    console.log(`${response.choices[0].message}\n\n\n`)
-    console.log("Here is content:\n")
-    console.log(`${report}\n\n\n`)
 
     res.json({ text: report });
   } catch (err) {
@@ -192,120 +241,134 @@ Publication Date: ${currentArticle.publicationDate}
 });
 
 app.get("/business", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "business",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("business", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "business"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("business.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
 
 app.get("/entertainment", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "entertainment",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("entertainment", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "entertainment"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("entertainment.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
 
 app.get("/general", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "general",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("general", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "general"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("general.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
 
 app.get("/health", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "health",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("health", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "health"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("health.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
 
 app.get("/science", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "science",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("science", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "science"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("science.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
 
 app.get("/sports", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "sports",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("sports", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "sports"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("sports.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
 
 app.get("/technology", async (req, res) => {
-  const response = await axios.get(newsWebsite, {
-    params: {
-      apiKey: apiKey,
-      country: "us",
-      category: "technology",
-      sources: "",
-      q: "",
-    },
+  const articles = await fetchWithCache("technology", async () => {
+    const r = await axios.get(newsWebsite, {
+      params: {
+        apiKey,
+        country: "us",
+        category: "technology"
+      }
+    });
+    return r.data.articles;
   });
+
   res.render("technology.ejs", {
     date: getTodaysDate(),
-    data: response.data.articles,
+    data: articles,
     year: new Date().getFullYear()
   });
 });
